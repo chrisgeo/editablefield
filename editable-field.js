@@ -56,7 +56,7 @@ YUI.add('editable-field', function(Y){
                 template = TEMPLATES[type];
             
             host.setContent(Y.substitute(template, {value: content}));
-            
+            host.one(':first-child').focus();
         },
         _renderToEditable: function(){
             var host = this.get('host'),
@@ -70,8 +70,10 @@ YUI.add('editable-field', function(Y){
             switch(type){
                 case 'textarea':
                     node = host.one('textarea');
+                    break;
                 default:
                     node = host.one('input[type='+type+']');
+                    break;
             }
             
             return node.get('value');
@@ -87,5 +89,5 @@ YUI.add('editable-field', function(Y){
 },'0.1', {requires: ['node', 'event', 'plugin', 'substitute']});
 
 YUI().use('node', 'editable-field', function(Y){
-    Y.one('.editable').plug({fn: Y.Plugin.EditableField, cfg: {type: 'text'}});
+    Y.one('.editable').plug({fn: Y.Plugin.EditableField, cfg: {type: 'textarea'}});
 });
