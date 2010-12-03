@@ -56,6 +56,7 @@ YUI.add('editable-field', function(Y){
                 
             this.set(STATE, STATES.editable);
             host.setContent(content);
+            host.detach('clickoutside');
             host.on('click', this._renderToEdit, this);
         },
         _getContent: function(type){
