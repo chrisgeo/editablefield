@@ -16,9 +16,9 @@ YUI.add('editable-field', function(Y){
     };
     
     var EditableField = function(config){
-        config.host.on('click', this._editEvent, this);
+        config.host.on('click', this._renderToEdit, this);
         EditableField.superclass.constructor.apply(this, arguments);
-    }
+    };
     
     EditableField.NS = 'ef';
     
@@ -37,32 +37,26 @@ YUI.add('editable-field', function(Y){
     };
     
     Y.extend(EditableField, Y.Plugin.Base, {
-        _editEvent: function(){
-            var currState = this.get(STATE);
-            if(currState == STATES.editable){
-                //render correct form element
-                this._renderToEdit();
-                this.set(STATE, STATES.editing);
-            }else if(currState == STATES.editing){
-                //render uneditable and back
-                this._renderToEditable();
-                this.set(STATE, STATES.editable);
-            }
-        },
         _renderToEdit: function(){
            var host = this.get('host'),
                 type = this.get('type'),
                 content = host.getContent(),
                 template = TEMPLATES[type];
             
+            this.set(STATE, STATES.editing);
             host.setContent(Y.substitute(template, {value: content}));
+            host.detach('click');
+            host.on('clickoutside', this._renderToEditable, this);
             host.one(':first-child').focus();
         },
         _renderToEditable: function(){
             var host = this.get('host'),
                 type = this.get('type'),
                 content = this._getContent(type);
+                
+            this.set(STATE, STATES.editable);
             host.setContent(content);
+            host.on('click', this._renderToEdit, this);
         },
         _getContent: function(type){
             var host = this.get('host'),
@@ -86,7 +80,7 @@ YUI.add('editable-field', function(Y){
     Y.namespace('Plugin');
     Y.Plugin.EditableField = EditableField;
     
-},'0.1', {requires: ['node', 'event', 'plugin', 'substitute']});
+},'0.1', {requires: ['node', 'event', 'plugin', 'substitute', 'gallery-outside-events']});
 
 YUI().use('node', 'editable-field', function(Y){
     Y.one('.editable').plug({fn: Y.Plugin.EditableField, cfg: {type: 'textarea'}});
