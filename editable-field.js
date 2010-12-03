@@ -1,3 +1,7 @@
+//TODO: expand area to fit width of object
+//TODO: support select/option
+//TODO: \r|\n|\r|\n-> <br />
+//TODO: checkbox == wikimarkup?
 YUI.add('editable-field', function(Y){
     var _EDIT_CLASS = 'yui3-editable-field',
     STATE = 'state',
@@ -13,7 +17,12 @@ YUI.add('editable-field', function(Y){
         select: '<select name="{name}" class="{classes}">{options}</select>',
         radio: '<input name="{name}"  type="radio" class="{classes}" value="{value}" />',
         checkbox: '<input name="{name}" type="checkbox" class="{classes}" value="{value}" />'
-    };
+    },
+    SELECTORS = {
+        textarea: 'textarea',
+        input: 'input[type={type}]'
+    },
+    _REPLACE = "replace";
     
     var EditableField = function(config){
         config.host.on('click', this._renderToEdit, this);
@@ -41,13 +50,16 @@ YUI.add('editable-field', function(Y){
            var host = this.get('host'),
                 type = this.get('type'),
                 content = host.getContent(),
-                template = TEMPLATES[type];
+                template = TEMPLATES[type],
+                child = Y.Node.create(Y.substitute(template, {value: content}));
             
+            this._setUpChild(child, host);
             this.set(STATE, STATES.editing);
-            host.setContent(Y.substitute(template, {value: content}));
+            
+            host.insert(child, _REPLACE);
             host.detach('click');
             host.on('clickoutside', this._renderToEditable, this);
-            host.one(':first-child').focus();
+            child.focus();
         },
         _renderToEditable: function(){
             var host = this.get('host'),
@@ -55,6 +67,7 @@ YUI.add('editable-field', function(Y){
                 content = this._getContent(type);
                 
             this.set(STATE, STATES.editable);
+            //TODO match host to child h/w
             host.setContent(content);
             host.detach('clickoutside');
             host.on('click', this._renderToEdit, this);
@@ -64,10 +77,10 @@ YUI.add('editable-field', function(Y){
                 node;
             switch(type){
                 case 'textarea':
-                    node = host.one('textarea');
+                    node = host.one(SELECTORS.textarea);
                     break;
                 default:
-                    node = host.one('input[type='+type+']');
+                    node = host.one(Y.substitute(SELECTORS.input, {type: type}));
                     break;
             }
             
@@ -75,6 +88,10 @@ YUI.add('editable-field', function(Y){
         },
         _findTemplate: function(type){
                 return this.TEMPLATES[type];
+        },
+        _setUpChild: function(child, parent){
+            child.setStyle('width', parent.getStyle('width'));
+            child.setStyle('height', parent.getStyle('height'));
         }
     });
     
@@ -82,7 +99,3 @@ YUI.add('editable-field', function(Y){
     Y.Plugin.EditableField = EditableField;
     
 },'0.1', {requires: ['node', 'event', 'plugin', 'substitute', 'gallery-outside-events']});
-
-YUI().use('node', 'editable-field', function(Y){
-    Y.one('.editable').plug({fn: Y.Plugin.EditableField, cfg: {type: 'textarea'}});
-});

@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html>
     <head>
-    <script type="text/javascript" charset="utf-8" src="http://yui.yahooapis.com/3.3.0pr1/build/yui/yui-min.js"></script>
+        <style>
+            p.editable {
+                border: 2px solid blue;
+                width: 200px;
+            }
+        </style>
+        <script type="text/javascript" charset="utf-8" src="http://yui.yahooapis.com/3.3.0pr1/build/yui/yui-min.js"></script>
     </head>
     <body>
         <p class="editable" type="textarea">Lipsum</p>
         <script type="text/javascript" charset="utf-8" src="./editable-field.js"></script>
+        <script type="text/javascript" charset="utf-8">        
+            YUI().use('node', 'editable-field', function(Y){
+                Y.one('.editable').plug({fn: Y.Plugin.EditableField, cfg: {type: 'textarea'}});
+            });
+        </script>
     </body>
 </html>
